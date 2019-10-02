@@ -13,33 +13,60 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-char	*residue_check(char **residue, char **line, int fd)
+struct list_s 
 {
-	char *p;
-
-	p = NULL;
-	if (residue[fd])
-	{
-		if ((p = ft_strchr(residue[fd], '\n')))
-		{
-			*p = '\0';
-			*line = ft_strdup(residue[fd]);
-			ft_strcpy(residue[fd], ++p);
-		}
-		else
-		{
-			*line = ft_strdup(residue[fd]);
-			ft_strclr(residue[fd]);
-		}
-	}
-	else
-		*line = ft_strnew(1);
-	return (p);
+	void * data;
+	list_s * next;
+	list_s * parent;
 }
+
+struct node
+{
+	int fd;
+	char * rest;
+}
+
+list_s *  pop(list_s * list)
+{
+ // ToDO
+}
+
+char	*pop_rest(cont int fd, list_s* rest_ptr)
+{
+	while (rest != NULL)
+	{
+		struct node* data = (struct node*)rest->data;
+		if (data == NULL)
+		{
+			return NULL;
+		}
+
+		if (data->fd == fd && data->rest != NULL)
+		{
+			char* rest = node->rest;
+			if (ЕСЛИ ЕСТЬ ЕЩЕ \n)
+			{
+				 ВЕРНУТЬ ТОЛЬКО ЧАСТЬ И ВЫРЕЗАТЬ ЕЕ ИЗ rest
+			}
+			else
+			{
+				data->rest = NULL;
+				pop(rest_ptr);
+				return rest;
+			}
+		}
+
+		rest = rest->next;
+	}
+
+	return NULL;
+}
+
+struct list {}
 
 int		get_next_line(const int fd, char **line)
 {
-	static char	*residue[255];
+	static list_s * rest_cash; 
 	int			bytes_read;
 	char		*p;
 	char		*tmp;
@@ -47,20 +74,44 @@ int		get_next_line(const int fd, char **line)
 
 	if (fd < 0 || line == NULL || read(fd, buf, 0) < 0)
 		return (-1);
-	p = residue_check(residue, line, fd);
-	while (!p && ((bytes_read = read(fd, buf, BUFF_SIZE))))
+
+	rest =  pop_rest(fd, rest_cash);
+	
+	if (rest != NULL && ft_strchr(rest, '\n'))
+	{
+		*line = rest;
+		return;
+	}
+	else if (rest == NULL)
+	{
+		//init rest if empty
+	}
+
+	while (bytes_read = read(fd, buf, BUFF_SIZE))
 	{
 		buf[bytes_read] = '\0';
-		if ((p = ft_strchr(buf, '\n')))
+		if ((tmp = ft_strchr(buf, '\n')) // find /0
 		{
-			*p = '\0';
-			p++;
-			free(residue[fd]);
-			residue[fd] = ft_strdup(p);
+			*tmp = '\0';
+			if (tmp - buf < BUFF_SIZE)
+			{
+				buf = ft_strjoin(rest, buf, tmp-buf);
+				push(rest_cash, tmp+1);
+			}
+			else
+			{
+				buf = ft_strjoin(rest, buf);
+			}
+			return;
 		}
-		tmp = *line;
-		*line = ft_strjoin(*line, buf);
-		free(tmp);
+
 	}
 	return ((bytes_read || ft_strlen(residue[fd]) || ft_strlen(*line)) ? 1 : 0);
+}
+
+
+int		get_next_line_v2(const int fd, char **line)
+{
+	if (fd < 0 || line == NULL || read(fd, buf, 0) < 0)
+		return (-1);
 }
