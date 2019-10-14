@@ -13,61 +13,46 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-struct list_s 
-{
-	void * data;
-	list_s * next;
-	list_s * parent;
-}
 
-struct node
+struct rest_data
 {
 	int fd;
 	char * rest;
 }
 
-list_s *  pop(list_s * list)
+char * pop_res(int fd, struct list_s * rest_cash)
 {
- // ToDO
-}
+	rest_data * tmp;
+	char * result;
+	char * ptr;
 
-char	*pop_rest(cont int fd, list_s* rest_ptr)
-{
-	while (rest != NULL)
+	while (rest_cash != NULL)
 	{
-		struct node* data = (struct node*)rest->data;
-		if (data == NULL)
+		tmp = (rest_data*)rest_cash->data;
+		if (data->fd == fd)
 		{
-			return NULL;
+			tmp = pop(rest_cash);
+			if ((ptr = ft_strchr(tmp, '\n')))
+			{
+				ft_strncpy(copy, ptr + 1, ft_strlen(tmp) - (tmp - ptr));
+				push_to_end(rest_cash, copy);
+				*(ptr + 2) = '\0';
+				free(ptr + 2); // ???  // free rest of tmp
+			}
+
+			return tmp;
 		}
 
-		if (data->fd == fd && data->rest != NULL)
-		{
-			char* rest = node->rest;
-			if (ЕСЛИ ЕСТЬ ЕЩЕ \n)
-			{
-				 ВЕРНУТЬ ТОЛЬКО ЧАСТЬ И ВЫРЕЗАТЬ ЕЕ ИЗ rest
-			}
-			else
-			{
-				data->rest = NULL;
-				pop(rest_ptr);
-				return rest;
-			}
-		}
-
-		rest = rest->next;
+		rest_cash = rest_cash->next;
 	}
 
 	return NULL;
 }
 
-struct list {}
-
 int		get_next_line(const int fd, char **line)
 {
 	static list_s * rest_cash; 
-	int			bytes_read;
+	int		bytes_read;
 	char		*p;
 	char		*tmp;
 	char		buf[BUFF_SIZE + 1];
@@ -84,7 +69,7 @@ int		get_next_line(const int fd, char **line)
 	}
 	else if (rest == NULL)
 	{
-		//init rest if empty
+		rest = "";
 	}
 
 	while (bytes_read = read(fd, buf, BUFF_SIZE))
@@ -93,10 +78,10 @@ int		get_next_line(const int fd, char **line)
 		if ((tmp = ft_strchr(buf, '\n')) // find /0
 		{
 			*tmp = '\0';
-			if (tmp - buf < BUFF_SIZE)
+			if ((tmp - buf) < BUFF_SIZE)
 			{
 				buf = ft_strjoin(rest, buf, tmp-buf);
-				push(rest_cash, tmp+1);
+				push(rest_cash, tmp + 1);
 			}
 			else
 			{
