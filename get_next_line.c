@@ -14,104 +14,41 @@
 #include <stdio.h>
 #include <string.h>
 
-struct list_s	*push(struct list_s *parent, void *data)
+int		get_next_line(const int fd, char ** line)
 {
-	struct list_s *new_node = (struct list_s *)malloc(sizeof(struct list_s));
-	new_node->data = data;
-	new_node->next = NULL;
-	new_node->parent = NULL;
-	new_node->parent = parent;
-	if (parent != NULL)
-		parent->next = new_node;
-	return (new_node);
-}
-
-struct list_s	*push_to_end(struct list_s *node, void *data)
-{
-	if (node == NULL)
-	{
-		struct list_s *new_node = (struct list_s *)malloc(sizeof(struct list_s));
-		new_node->data = data;
-		new_node->next = NULL;
-		new_node->parent = NULL;
-		return (new_node);
-	}
-	while (node->next != NULL)
-		node = node->next;
-	return (push(node, data));
-}
-
-void	*pop(struct list_s *node)
-{
-	void	*data;
-	data = node->data;
-	if (node->parent != NULL)
-		node->parent->next = node->next;
-	if (node->next != NULL)
-		node->next->parent = node->parent;
-	free(node);
-	return (data);
-}
-
-char	pop_res(int fd, struct list_s *rest_cash)
-{
-	struct rest_data	*tmp;
-	char				*ptr;
-	char				*copy;
-
-	while (rest_cash != NULL)
-	{
-		tmp = rest_cash->data;
-		if (data->fd == fd)
-		{
-			tmp = pop(rest_cash);
-			if ((ptr = ft_strchr((const char *)tmp, '\n')))
-			{
-				ft_strncpy(copy, ptr + 1, ft_strlen((const char *)tmp) - ((const char *)tmp - ptr));
-				push_to_end(rest_cash, copy);
-				*(ptr + 2) = '\0';
-				free(ptr + 2);
-			}
-			return ((char)tmp);
-		}
-		rest_cash = rest_cash->next;
-	}
-	return ((char)(NULL));
-}
-
-int		get_next_line(const int fd, char **line)
-{
-	struct list_s	*rest_cash;
-	int				bytes_read;
-	char			*rest;
-	char			*tmp;
-	char			buf[BUFF_SIZE + 1];
+	int len;
+	char * ptr;
+	int bytes_read;
+	int capacity;
 
 	if (fd < 0 || line == NULL || read(fd, buf, 0) < 0)
 		return (-1);
-	rest = pop_res(fd, rest_cash);
-	if (rest != NULL && ft_strchr(rest, '\n'))
+
+	*line = (char*)malloc(sizeof(char) * BUFF_SIZE);
+	capacity = BUFF_SIZE;
+	ptr = *line;
+	len = 0;
+
+	while (bytes_read == read(fd, ptr, 1))
 	{
-		*line = rest;
-		return (0);
-	}
-	else if (rest == NULL)
-		rest = "";
-	while (bytes_read == read(fd, buf, BUFF_SIZE))
-	{
-		buf[bytes_read] = '\0';
-		if ((tmp = ft_strchr(buf, '\n')))
+		if (bytes_read == 0 || *ptr == '\n' || *ptr == '\0')
 		{
-			*tmp = '\0';
-			if ((tmp - buf) < BUFF_SIZE)
-			{
-				buf = (char *)ft_strjoin(rest, buf);
-				push(rest_cash, tmp + 1);
-			}
-			else
-				buf = ft_strjoin(rest, buf);
-			return (0);
+			*ptr = '\0';
+			return len; // Считать ли символ \0 и \n считанным символом? Если да, то тут len + 1
+		}
+
+		ptr++;
+
+		if (++len == capacity) // Тут происходит релокация памяти, на случай если мы превыщаем BUFF_SIZE. 
+		{
+			char * tmp = (char*)malloc(sizeof(char) * len * 2);
+			ft_strncpy(tmp, *line, len);
+			free(*line);
+			*line = tmp;
+			capacity *= 2;
 		}
 	}
-	return ((bytes_read || ft_strlen((const char *)rest_cash[fd]) || ft_strlen(*line)) ? 1 : 0);
+
+	*line[len + 1] = '\0';
+	return len;
 }

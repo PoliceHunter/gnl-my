@@ -19,19 +19,6 @@
 
 # define BUFF_SIZE 32
 
-struct					list_s
-{
-	void				*data;
-	struct	list_s		*next;
-	struct	list_s		*parent;
-};
-
-struct		rest_data
-{
-	int		fd;
-	char	*rest;
-};
-
 int		get_next_line(const int fd, char **line);
 
 #endif
